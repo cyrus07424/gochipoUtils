@@ -46,7 +46,7 @@ public class GochiPonAutoClicker {
 					// 全てのクッキーを削除
 					webDriver.manage().deleteAllCookies();
 				} else {
-					// アタリ?
+					// アタリ
 
 					// 全てのクッキーを出力
 					for (Cookie cookie : webDriver.manage().getCookies()) {
