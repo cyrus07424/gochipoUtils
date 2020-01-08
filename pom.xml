@@ -14,6 +14,45 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.webdriverextensions</groupId>
+				<artifactId>webdriverextensions-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>install-drivers</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<drivers>
+						<driver>
+							<name>geckodriver</name>
+							<platform>windows</platform>
+							<bit>64</bit>
+							<version>0.26.0</version>
+						</driver>
+						<driver>
+							<name>chromedriver</name>
+							<platform>windows</platform>
+							<bit>32</bit>
+							<version>78.0.3904.70</version>
+						</driver>
+						<driver>
+							<name>edgedriver</name>
+							<platform>windows</platform>
+							<bit>64</bit>
+							<version>6.17134</version>
+						</driver>
+					</drivers>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -29,21 +68,6 @@
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>3.141.59</version>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-firefox-driver</artifactId>
-			<version>3.141.59</version>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.141.59</version>
-		</dependency>
-		<dependency>
-			<groupId>com.codeborne</groupId>
-			<artifactId>phantomjsdriver</artifactId>
-			<version>1.4.4</version>
 		</dependency>
 	</dependencies>
 </project>

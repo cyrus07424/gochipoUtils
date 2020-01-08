@@ -1,27 +1,21 @@
 package utils;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.firefox.GeckoDriverService;
+import org.openqa.selenium.html5.Location;
 
 import constants.Configurations;
 import enums.BrowserType;
@@ -29,7 +23,7 @@ import enums.BrowserType;
 /**
  * Seleniumヘルパー.
  *
- * @author cyrus
+ * @author evosystem
  */
 public class SeleniumHelper {
 
@@ -39,24 +33,58 @@ public class SeleniumHelper {
 	 * @return
 	 */
 	public static WebDriver getWebDriver() {
+		return getWebDriver(null, null);
+	}
+
+	/**
+	 * WebDriverを取得.
+	 *
+	 * @param latitude
+	 * @param longitude
+	 * @return
+	 */
+	public static WebDriver getWebDriver(Double latitude, Double longitude) {
 		WebDriver driver = null;
 		switch (Configurations.USE_BROWSER_TYPE) {
 			case CHROME: {
-				System.setProperty("webdriver.chrome.driver", Configurations.CHROME_DRIVER_EXECUTABLE_PATH);
+				System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
+						Configurations.CHROME_DRIVER_EXECUTABLE_PATH);
 				ChromeOptions chromeOptions = new ChromeOptions();
-				chromeOptions.setHeadless(true);
+				chromeOptions.setHeadless(Configurations.USE_HEADLESS_MODE);
 				chromeOptions.addArguments("--disable-dev-shm-usage");
 				chromeOptions.addArguments("--no-sandbox");
+				chromeOptions.addArguments("--user-agent=" + Configurations.USE_UA);
+
 				Map<String, Object> chromePrefs = new HashMap<>();
 				chromePrefs.put("download.prompt_for_download", false);
+				chromePrefs.put("profile.managed_default_content_settings.geolocation", 1);
 				chromeOptions.setExperimentalOption("prefs", chromePrefs);
+
+				// setLocationメソッドを利用可能にするための設定
+				chromeOptions.setExperimentalOption("w3c", false);
+
 				driver = new ChromeDriver(chromeOptions);
+
+				if (latitude != null && longitude != null) {
+					// 位置情報を設定
+					((ChromeDriver) driver).setLocation(new Location(latitude, longitude, 0));
+				}
 				break;
 			}
 			case FIREFOX:
 			case WATERFOX: {
-				System.setProperty("webdriver.gecko.driver", Configurations.GECKO_DRIVER_EXECUTABLE_PATH);
+				System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY,
+						Configurations.GECKO_DRIVER_EXECUTABLE_PATH);
 				FirefoxProfile firefoxProfile = new FirefoxProfile();
+				if (latitude != null && longitude != null) {
+					// 位置情報を設定
+					firefoxProfile.setPreference("geo.prompt.testing", true);
+					firefoxProfile.setPreference("geo.prompt.testing.allow", true);
+					firefoxProfile.setPreference("geo.enabled", true);
+					firefoxProfile.setPreference("geo.wifi.uri", String.format(
+							"data:application/json,{\"location\": {\"lat\": %f, \"lng\": %f}, \"accuracy\": 100.0, \"status\": \"OK\"}",
+							latitude, longitude));
+				}
 				FirefoxOptions firefoxOptions = new FirefoxOptions();
 				firefoxOptions.setHeadless(Configurations.USE_HEADLESS_MODE);
 				firefoxOptions.setProfile(firefoxProfile);
@@ -73,20 +101,8 @@ public class SeleniumHelper {
 				driver = new EdgeDriver();
 				break;
 			}
-			case INTERNET_EXPLORER: {
-				// TODO
-				break;
-			}
 			default: {
-				if (!new File(Configurations.PHANTOMJS_EXECUTABLE_PATH).exists()) {
-					downloadPhantomJs();
-				}
-				DesiredCapabilities capabilities = new DesiredCapabilities();
-				capabilities.setCapability(
-						PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-						Configurations.PHANTOMJS_EXECUTABLE_PATH);
-				capabilities.setJavascriptEnabled(true);
-				driver = new PhantomJSDriver(capabilities);
+				// TODO
 				break;
 			}
 		}
@@ -98,32 +114,65 @@ public class SeleniumHelper {
 	}
 
 	/**
-	 * PhantomJSをダウンロード.<br>
-	 * windows用.
+	 * ページが完全に読み込まれるまで待機.<br>
+	 * https://code-examples.net/ja/q/598b97
+	 *
+	 * @param webDriver
 	 */
-	private static void downloadPhantomJs() {
+	public static void waitForBrowserToLoadCompletely(WebDriver webDriver) {
+		String state;
+		String oldstate;
 		try {
-			System.out.println("downloading phantomjs");
-
-			// 一時ファイルを作成
-			File tempZipFile = File.createTempFile("prefix", "suffix");
-
-			// 一時ファイルに保存
-			FileUtils.copyURLToFile(
-					new URL("https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-windows.zip"),
-					tempZipFile);
-
-			// ZIPを展開
-			System.out.println("inflating phantomjs");
-			try (ZipInputStream zipInputStream = new ZipInputStream(FileUtils.openInputStream(tempZipFile))) {
-				ZipEntry zipEntry;
-				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-					if (StringUtils.contains(zipEntry.getName(), "phantomjs.exe")) {
-						File outputFile = new File(Configurations.PHANTOMJS_EXECUTABLE_PATH);
-						Files.createDirectories(outputFile.getParentFile().toPath());
-						FileUtils.copyToFile(zipInputStream, outputFile);
-					}
+			System.out.println("Waiting for browser loading to complete");
+			int i = 0;
+			while (i < 5) {
+				Thread.sleep(1000);
+				state = ((JavascriptExecutor) webDriver).executeScript("return document.readyState;").toString();
+				System.out.println("." + Character.toUpperCase(state.charAt(0)) + ".");
+				if (state.equals("interactive") || state.equals("loading")) {
+					break;
 				}
+
+				// If browser in 'complete' state since last X seconds. Return.
+				if (i == 1 && state.equals("complete")) {
+					System.out.println("complete");
+					return;
+				}
+				i++;
+			}
+			i = 0;
+			oldstate = null;
+			Thread.sleep(2000);
+
+			// Now wait for state to become complete
+			while (true) {
+				state = ((JavascriptExecutor) webDriver).executeScript("return document.readyState;").toString();
+				System.out.println("." + state.charAt(0) + ".");
+				if (state.equals("complete")) {
+					System.out.println("complete");
+					break;
+				}
+
+				if (state.equals(oldstate)) {
+					i++;
+				} else {
+					i = 0;
+				}
+
+				// If browser state is same (loading/interactive) since last 60
+				// secs. Refresh the page.
+				if (i == 15 && state.equals("loading")) {
+					System.out.println("Browser in " + state + " state since last 60 secs. So refreshing browser.");
+					webDriver.navigate().refresh();
+					System.out.println("Waiting for browser loading to complete");
+					i = 0;
+				} else if (i == 6 && state.equals("interactive")) {
+					System.out
+							.println("Browser in " + state + " state since last 30 secs. So starting with execution.");
+					return;
+				}
+				Thread.sleep(4000);
+				oldstate = state;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

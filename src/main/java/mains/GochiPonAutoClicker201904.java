@@ -13,7 +13,7 @@ import utils.SeleniumHelper;
  *
  * @author cyrus
  */
-public class GochiPonAutoClicker {
+public class GochiPonAutoClicker201904 {
 
 	/**
 	 * メイン処理.
