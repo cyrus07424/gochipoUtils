@@ -23,7 +23,7 @@ import enums.BrowserType;
 /**
  * Seleniumヘルパー.
  *
- * @author evosystem
+ * @author cyrus
  */
 public class SeleniumHelper {
 
