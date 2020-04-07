@@ -30,22 +30,9 @@
 				<configuration>
 					<drivers>
 						<driver>
-							<name>geckodriver</name>
-							<platform>windows</platform>
-							<bit>64</bit>
-							<version>0.26.0</version>
-						</driver>
-						<driver>
 							<name>chromedriver</name>
 							<platform>windows</platform>
 							<bit>32</bit>
-							<version>78.0.3904.70</version>
-						</driver>
-						<driver>
-							<name>edgedriver</name>
-							<platform>windows</platform>
-							<bit>64</bit>
-							<version>6.17134</version>
 						</driver>
 					</drivers>
 				</configuration>
@@ -55,19 +42,14 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>4.0.0-alpha-5</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.10</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>3.141.59</version>
 		</dependency>
 	</dependencies>
 </project>

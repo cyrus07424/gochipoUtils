@@ -9,16 +9,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeDriverService;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.html5.Location;
 
 import constants.Configurations;
-import enums.BrowserType;
 
 /**
  * Seleniumヘルパー.
@@ -33,79 +25,21 @@ public class SeleniumHelper {
 	 * @return
 	 */
 	public static WebDriver getWebDriver() {
-		return getWebDriver(null, null);
-	}
+		System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
+				Configurations.CHROME_DRIVER_EXECUTABLE_PATH);
 
-	/**
-	 * WebDriverを取得.
-	 *
-	 * @param latitude
-	 * @param longitude
-	 * @return
-	 */
-	public static WebDriver getWebDriver(Double latitude, Double longitude) {
-		WebDriver driver = null;
-		switch (Configurations.USE_BROWSER_TYPE) {
-			case CHROME: {
-				System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
-						Configurations.CHROME_DRIVER_EXECUTABLE_PATH);
-				ChromeOptions chromeOptions = new ChromeOptions();
-				chromeOptions.setHeadless(Configurations.USE_HEADLESS_MODE);
-				chromeOptions.addArguments("--disable-dev-shm-usage");
-				chromeOptions.addArguments("--no-sandbox");
-				chromeOptions.addArguments("--user-agent=" + Configurations.USE_UA);
+		// ChromeOptions
+		ChromeOptions chromeOptions = new ChromeOptions();
+		chromeOptions.setHeadless(Configurations.USE_HEADLESS_MODE);
+		chromeOptions.addArguments("--disable-dev-shm-usage");
+		chromeOptions.addArguments("--no-sandbox");
 
-				Map<String, Object> chromePrefs = new HashMap<>();
-				chromePrefs.put("download.prompt_for_download", false);
-				chromePrefs.put("profile.managed_default_content_settings.geolocation", 1);
-				chromeOptions.setExperimentalOption("prefs", chromePrefs);
+		// prefs
+		Map<String, Object> chromePrefs = new HashMap<>();
+		chromeOptions.setExperimentalOption("prefs", chromePrefs);
 
-				// setLocationメソッドを利用可能にするための設定
-				chromeOptions.setExperimentalOption("w3c", false);
-
-				driver = new ChromeDriver(chromeOptions);
-
-				if (latitude != null && longitude != null) {
-					// 位置情報を設定
-					((ChromeDriver) driver).setLocation(new Location(latitude, longitude, 0));
-				}
-				break;
-			}
-			case FIREFOX:
-			case WATERFOX: {
-				System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY,
-						Configurations.GECKO_DRIVER_EXECUTABLE_PATH);
-				FirefoxProfile firefoxProfile = new FirefoxProfile();
-				if (latitude != null && longitude != null) {
-					// 位置情報を設定
-					firefoxProfile.setPreference("geo.prompt.testing", true);
-					firefoxProfile.setPreference("geo.prompt.testing.allow", true);
-					firefoxProfile.setPreference("geo.enabled", true);
-					firefoxProfile.setPreference("geo.wifi.uri", String.format(
-							"data:application/json,{\"location\": {\"lat\": %f, \"lng\": %f}, \"accuracy\": 100.0, \"status\": \"OK\"}",
-							latitude, longitude));
-				}
-				FirefoxOptions firefoxOptions = new FirefoxOptions();
-				firefoxOptions.setHeadless(Configurations.USE_HEADLESS_MODE);
-				firefoxOptions.setProfile(firefoxProfile);
-				if (Configurations.USE_BROWSER_TYPE == BrowserType.WATERFOX) {
-					System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "false");
-					firefoxOptions.setBinary(Configurations.WATER_FOX_EXECUTABLE_PATH);
-				}
-				driver = new FirefoxDriver(firefoxOptions);
-				break;
-			}
-			case EDGE: {
-				System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
-						Configurations.EDGE_DRIVER_EXECUTABLE_PATH);
-				driver = new EdgeDriver();
-				break;
-			}
-			default: {
-				// TODO
-				break;
-			}
-		}
+		// WebDriverを取得
+		WebDriver driver = new ChromeDriver(chromeOptions);
 
 		// タイムアウトを設定
 		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);

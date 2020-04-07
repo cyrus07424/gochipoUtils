@@ -3,7 +3,7 @@
 ## Run
 
 ```java
-java mains.GochiPonAutoClicker
+java mains.GochiPonAutoClicker*
 ```
 
 ## Result

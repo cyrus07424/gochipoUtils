@@ -9,7 +9,7 @@ import org.openqa.selenium.WebElement;
 import utils.SeleniumHelper;
 
 /**
- * ごちポン！自動クリック.
+ * ごちポン！自動クリック(2019/04).
  *
  * @author cyrus
  */
