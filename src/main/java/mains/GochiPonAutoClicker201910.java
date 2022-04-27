@@ -1,5 +1,6 @@
 package mains;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,14 +49,14 @@ public class GochiPonAutoClicker201910 {
 				webDriver.findElement(By.cssSelector("a.quiz_start")).click();
 
 				// クイズの回答をクリック
-				new WebDriverWait(webDriver, 10)
+				new WebDriverWait(webDriver, Duration.ofSeconds(10))
 						.until(ExpectedConditions.urlToBe("https://cp2.americanmeat.jp/csm/present/191001/entry"));
 				SeleniumHelper.waitForBrowserToLoadCompletely(webDriver);
 				List<WebElement> answerButtonList = webDriver.findElements(By.cssSelector("a.answer_btn"));
 				answerButtonList.get(correctAnswerIndex).click();
 
 				// ルーレットに挑戦ボタンを取得
-				new WebDriverWait(webDriver, 10)
+				new WebDriverWait(webDriver, Duration.ofSeconds(10))
 						.until(ExpectedConditions.urlToBe("https://cp2.americanmeat.jp/csm/present/191001/results"));
 				SeleniumHelper.waitForBrowserToLoadCompletely(webDriver);
 				WebElement resultButton = webDriver.findElement(By.cssSelector("a.btn.result_btn"));
@@ -73,7 +74,7 @@ public class GochiPonAutoClicker201910 {
 				}
 
 				// スタートボタンをクリック
-				new WebDriverWait(webDriver, 10)
+				new WebDriverWait(webDriver, Duration.ofSeconds(10))
 						.until(ExpectedConditions.urlToBe("https://cp2.americanmeat.jp/csm/present/191001/roulette"));
 				SeleniumHelper.waitForBrowserToLoadCompletely(webDriver);
 				webDriver.findElement(By.cssSelector("a.roulette_btn.btn")).click();
